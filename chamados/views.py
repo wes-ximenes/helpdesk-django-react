@@ -1,10 +1,9 @@
 from rest_framework.viewsets import ModelViewSet
-from .models import Chamado
 from .serializers import ChamadoSerializer, HistoricoStatusSerializer, StatusSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status as http_status
-from .models import Status, HistoricoStatus
+from .models import Chamado, Status, HistoricoStatus
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 
@@ -71,7 +70,16 @@ class ChamadoViewSet(ModelViewSet):
     
 
     
-    
+class StatusViewSet(ModelViewSet):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+    permission_classes = [IsAuthenticated]    
+
+
+class HistoricoStatusViewSet(ModelViewSet):
+    queryset = HistoricoStatus.objects.all().order_by('-data_alteracao')
+    serializer_class = HistoricoStatusSerializer
+    permission_classes = [IsAuthenticated]    
     
 
 
