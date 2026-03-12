@@ -2,7 +2,7 @@
 
 Sistema de Helpdesk desenvolvido como **projeto acadêmico e de portfólio**, com o objetivo de simular um ambiente real de suporte técnico utilizado por empresas de médio porte.
 
-O projeto foi pensado para aplicar, na prática, conceitos de **desenvolvimento full stack**, **organização de chamados**, **persistência de dados** e **geração de relatórios**, além de trabalho colaborativo em equipe.
+O projeto foi pensado para aplicar, na prática, conceitos de **desenvolvimento full stack**, **organização de chamados**, **persistência de dados** e **geração de relatórios**.
 
 ---
 
@@ -24,14 +24,14 @@ Este projeto representa a transição do aprendizado teórico para a prática, s
 ### Chamados
 - Criação, edição e exclusão (CRUD)
 - Controle de status:
-  - 🟢 Aberto  
-  - 🟡 Em andamento  
-  - 🔴 Fechado
+  - 🟢 Ativo
+  - 🟡 Finalizado 
+  - 🔴 Cancelado
 - Associação de chamados a usuários
 
 ### Relatórios
 - Geração de relatórios estatísticos
-- Processamento auxiliar desenvolvido em **C**
+- Processamento auxiliar desenvolvido em **Python**
 - Análise de volume e status dos chamados
 
 ---
@@ -52,7 +52,7 @@ Este sistema resolve:
 ### Frontend
 - HTML5  
 - CSS3  
-- JavaScript  
+- JavaScript/ React 
 
 ### Backend
 - Python/ Django
@@ -105,51 +105,18 @@ Alunos Envolvidos e Papéis
 
 Devido ao contexto acadêmico e ao tamanho reduzido da equipe, os integrantes assumiram múltiplos papéis estratégicos e operacionais, prática comum em times ágeis, startups e projetos educacionais.
 
-👤 Khemraj Junior
-
-Product Manager (PM) e Frontend Developer
-
-- Definição da visão do produto
-- Priorização do backlog
-- Decisão do escopo do MVP
-- Alinhamento entre necessidades do usuário e viabilidade técnica
-- UX/UI Designer
-- Pesquisa com usuários
-- Criação de fluxos e jornadas
-- Prototipação no Figma
-- Definição do design system
-- Frontend Developer
-- Implementação das interfaces do sistema
-- Garantia de fidelidade entre design e código
-- Integração com o backend
-
-Quality Assurance (QA)
-- Planejamento de testes
-- Testes funcionais
-- Testes de usabilidade
-- Validação das funcionalidades antes das entregas
-
-👤 Bryan
-
-Frontend Developer
-
-- Desenvolvimento das interfaces
-- Apoio na responsividade
-- Integração com APIs
-- Revisão e melhorias no código frontend
-
-👤 Wesley
+👤 Wesley Ximenes
 
 Backend Developer
 
 - Modelagem do banco de dados
 - Implementação das regras de negócio
-- Desenvolvimento de APIs e autenticação
+- Desenvolvimento de API e autenticação JWT
 - Segurança e persistência dos dados
 
 Justificativa Acadêmica
 
-Projeto desenvolvido por uma equipe reduzida, exigindo o acúmulo de papéis estratégicos e operacionais, permitindo uma visão completa do ciclo de vida do produto — do planejamento à entrega.
+Projeto desenvolvido com intenção de permitir uma visão completa do ciclo de vida do produto — do planejamento à entrega.
 
 Licença
 
