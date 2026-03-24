@@ -48,9 +48,6 @@ class ChamadoViewSet(ModelViewSet):
         except Status.DoesNotExist:
             return Response({'error': 'Status não encontrado.'}, status=http_status.HTTP_404_NOT_FOUND)
         
-
-        if chamado.status.nome != "ATIVO":
-            return Response({'error': 'Somente chamados com status "ATIVO" podem ser atualizados.'}, status=http_status.HTTP_400_BAD_REQUEST)
         
         chamado.status = status_novo
         chamado.save()
