@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 function Dashboard() {
   const navigate = useNavigate();
 
-  // Token JWT
   const token = localStorage.getItem("access");
 
   // ================================
@@ -14,13 +13,16 @@ function Dashboard() {
 
   const [chamados, setChamados] = useState([]);
 
-  // Formulário
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
   const [statusId, setStatusId] = useState("");
 
-  // Lista de status
+  const [loadingId, setLoadingId] = useState(null);
+  const [mensagem, setMensagem] = useState("");
+
   const [statusList, setStatusList] = useState([]);
+
+  const [statusTemp, setStatusTemp] = useState({});
 
   // ================================
   // BUSCAR CHAMADOS
@@ -33,8 +35,6 @@ function Dashboard() {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      console.log("Chamados:", response.data);
 
       setChamados(response.data.results);
     } catch (error) {
@@ -53,8 +53,6 @@ function Dashboard() {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      console.log("Status:", response.data);
 
       setStatusList(response.data.results);
     } catch (error) {
@@ -84,15 +82,52 @@ function Dashboard() {
 
       console.log("Chamado criado:", response.data);
 
-      // Limpar formulário
       setTitulo("");
       setDescricao("");
       setStatusId("");
 
-      // Atualizar lista
       buscarChamados();
     } catch (error) {
       console.error("Erro ao criar chamado:", error);
+    }
+  };
+
+  // ================================
+  // ATUALIZAR STATUS (PATCH)
+  // ================================
+
+  const atualizarStatus = async (id, novoStatus) => {
+    setLoadingId(id);
+
+    console.log("Enviando:", id, novoStatus, typeof novoStatus);
+
+    try {
+      await axios.patch(
+        `http://127.0.0.1:8000/api/chamados/${id}/atualizar_status/`,
+        { status: novoStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setMensagem("Status atualizado com sucesso!");
+
+      setTimeout(() => setMensagem(""), 5000);
+
+      buscarChamados();
+
+    } catch (error) {
+      console.error("Erro completo:", error);
+      console.error("Resposta do backend:", error.response?.data);
+
+      setMensagem("Erro ao atualizar status");
+
+      setTimeout(() => setMensagem(""), 3000);
+
+    } finally {
+      setLoadingId(null);
     }
   };
 
@@ -107,7 +142,7 @@ function Dashboard() {
   }
 
   // ================================
-  // USE EFFECT (AO CARREGAR)
+  // USE EFFECT
   // ================================
 
   useEffect(() => {
@@ -172,6 +207,12 @@ function Dashboard() {
 
       <h2>Chamados</h2>
 
+      {mensagem && (
+        <p style={{ color: mensagem.includes("Erro") ? "red" : "green" }}>
+          {mensagem}
+        </p>
+      )}
+
       {chamados.length === 0 ? (
         <p>Nenhum chamado encontrado.</p>
       ) : (
@@ -179,6 +220,43 @@ function Dashboard() {
           {chamados.map((chamado) => (
             <li key={chamado.id}>
               <strong>{chamado.titulo}</strong> - {chamado.status_nome}
+
+              <br />
+
+              <select
+                value={
+                  statusTemp[chamado.id] !== undefined
+                    ? statusTemp[chamado.id]
+                    : chamado.status
+                }
+                onChange={(e) =>
+                  setStatusTemp({
+                    ...statusTemp,
+                    [chamado.id]: Number(e.target.value)
+                  })
+                }
+              >
+                {statusList.map((status) => (
+                  <option key={status.id} value={status.id}>
+                    {status.nome}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                onClick={() =>
+                  atualizarStatus(
+                    chamado.id,
+                    statusTemp[chamado.id] !== undefined
+                      ? statusTemp[chamado.id]
+                      : chamado.status
+                  )
+                }
+                disabled={loadingId === chamado.id}
+              >
+                {loadingId === chamado.id ? "Salvando..." : "Salvar"}
+              </button>
+
             </li>
           ))}
         </ul>
