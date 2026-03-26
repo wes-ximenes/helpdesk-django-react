@@ -1,10 +1,13 @@
 from rest_framework.viewsets import ModelViewSet
-from .serializers import ChamadoSerializer, HistoricoStatusSerializer, StatusSerializer
+from rest_framework.views import APIView
+from .serializers import ChamadoSerializer, HistoricoStatusSerializer, StatusSerializer, UserSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status as http_status
 from .models import Chamado, Status, HistoricoStatus
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+
+from django.contrib.auth.models import User
 
 
 class ChamadoViewSet(ModelViewSet):
@@ -80,6 +83,11 @@ class HistoricoStatusViewSet(ModelViewSet):
     
 
 
+class MeView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
        
 
