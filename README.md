@@ -151,6 +151,11 @@ npm install
 npm run dev
 ```
 
+### Usuário cliente para login:
+- User: cliente_teste
+- Senha: cliente@123
+
+
 ---
 
 ## Autor
