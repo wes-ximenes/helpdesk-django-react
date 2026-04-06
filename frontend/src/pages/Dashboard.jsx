@@ -15,7 +15,16 @@ function Dashboard() {
   const [statusTemp, setStatusTemp] = useState({});
   const [user, setUser] = useState(null);
 
+  const [respostas, setRespostas] = useState({});
+  const [novaResposta, setNovaResposta] = useState({});
+
   const isAdmin = user && user.is_staff === true;
+
+  const totalChamados = chamados.length;
+
+  const chamadosResolvidos = chamados.filter(
+    (c) => c.status_nome === "FINALIZADO"
+  ).length;
 
   const buscarChamados = async () => {
     try {
@@ -41,6 +50,43 @@ function Dashboard() {
       setUser(response.data);
     } catch (error) {
       console.error("Erro ao buscar usuário:", error);
+    }
+  };
+
+  const buscarRespostas = async (chamadoId) => {
+    try {
+      const response = await api.get(`/respostas/?chamado=${chamadoId}`);
+      setRespostas((prev) => ({
+        ...prev,
+        [chamadoId]: response.data.results,
+      }));
+    } catch (error) {
+      console.error("Erro ao buscar respostas:", error);
+    }
+  };
+
+  const enviarResposta = async (chamadoId) => {
+    const mensagem = novaResposta[chamadoId];
+
+    if (!mensagem || mensagem.trim() === "") {
+      alert("Digite uma mensagem");
+      return;
+    }
+
+    try {
+      await api.post("/respostas/", {
+        chamado: chamadoId,
+        mensagem: mensagem,
+      });
+
+      setNovaResposta({
+        ...novaResposta,
+        [chamadoId]: "",
+      });
+
+      buscarRespostas(chamadoId);
+    } catch (error) {
+      console.error("Erro detalhado:", error.response?.data); // 🔥 IMPORTANTE
     }
   };
 
@@ -82,6 +128,28 @@ function Dashboard() {
     }
   };
 
+  const deletarChamado = async (id) => {
+    const confirmar = window.confirm("Tem certeza que deseja excluir este chamado?");
+    if (!confirmar) return;
+
+    setLoadingId(id);
+
+    try {
+      await api.delete(`/chamados/${id}/`);
+
+      setMensagem("Chamado deletado com sucesso!");
+      setTimeout(() => setMensagem(""), 3000);
+
+      buscarChamados();
+    } catch (error) {
+      console.error("Erro ao deletar chamado:", error);
+      setMensagem("Erro ao deletar chamado");
+      setTimeout(() => setMensagem(""), 3000);
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
   function handleLogout() {
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
@@ -96,177 +164,146 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-blue-950 flex flex-col items-center p-6 text-white">
-
       <div className="w-full max-w-5xl space-y-6">
 
-        {/* HEADER */}
-        <div className="bg-blue-900 shadow-lg rounded-xl p-6">
-          <h1 className="text-3xl font-bold mb-4">
-            Dashboard
-          </h1>
+        <div className="bg-blue-900 p-6 rounded">
+          <h1 className="text-2xl mb-4">Dashboard</h1>
 
-          <p className="text-blue-200">
-            Você está logado!
-          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-blue-800 p-4 text-center">
+              <p>Chamados registrados</p>
+              <p className="text-xl">{totalChamados}</p>
+            </div>
 
-          <p className="mb-4">
-            Status:{" "}
-            <span className="font-semibold text-green-400">
-              {localStorage.getItem("access") ? "Autenticado" : "Não autenticado"}
-            </span>
-          </p>
+            <div className="bg-blue-800 p-4 text-center">
+              <p>Chamados resolvidos</p>
+              <p className="text-xl text-green-400">{chamadosResolvidos}</p>
+            </div>
+          </div>
 
-          {user && (
-            <p className="text-sm text-blue-300 mb-2">
-              Usuário: {user.username} {isAdmin && "(Admin)"}
-            </p>
-          )}
+          {user && <p className="mt-2">Usuário: {user.username}</p>}
 
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 px-4 py-2 rounded hover:bg-red-600 hover:scale-105 transition transform"
-          >
+          <button onClick={handleLogout} className="mt-3 bg-red-500 px-3 py-1">
             Sair
           </button>
         </div>
 
-        {/* CRIAR CHAMADO */}
-        <div className="bg-blue-900 p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-semibold mb-4">
-            Criar novo chamado
-          </h2>
+        <div className="bg-blue-900 p-6 rounded">
+          <h2 className="mb-3">Criar chamado</h2>
 
-          <input
-            type="text"
-            placeholder="Título"
-            value={titulo}
-            onChange={(e) => setTitulo(e.target.value)}
-            className="w-full bg-blue-800 border border-blue-700 p-3 rounded mb-3 text-white placeholder-gray-400"
-          />
+          <input value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Título" className="w-full mb-2 p-2 bg-blue-800" />
+          <textarea value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="Descrição" className="w-full mb-2 p-2 bg-blue-800" />
 
-          <textarea
-            placeholder="Descrição"
-            value={descricao}
-            onChange={(e) => setDescricao(e.target.value)}
-            className="w-full bg-blue-800 border border-blue-700 p-3 rounded mb-3 text-white placeholder-gray-400"
-          />
-
-          <select
-            value={statusId}
-            onChange={(e) => setStatusId(e.target.value)}
-            className="w-full bg-blue-800 border border-blue-700 p-3 rounded mb-3 text-white"
-          >
-            <option value="">Selecione um status</option>
-
-            {statusList.map((status) => (
-              <option key={status.id} value={status.id}>
-                {status.nome}
-              </option>
+          <select value={statusId} onChange={(e) => setStatusId(e.target.value)} className="w-full mb-2 p-2 bg-blue-800">
+            <option value="">Selecione</option>
+            {statusList.map((s) => (
+              <option key={s.id} value={s.id}>{s.nome}</option>
             ))}
           </select>
 
-          <button
-            onClick={criarChamado}
-            className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600 hover:scale-105 transition transform"
-          >
-            Criar Chamado
+          <button onClick={criarChamado} className="bg-blue-500 px-3 py-1">
+            Criar
           </button>
         </div>
 
-        {/* LISTA DE CHAMADOS */}
-        <div className="bg-blue-900 p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-semibold mb-4">
-            Chamados
-          </h2>
+        <div className="bg-blue-900 p-6 rounded">
+          <h2 className="mb-3">Chamados</h2>
 
-          {mensagem && (
-            <p
-              className={`mb-4 p-3 rounded ${
-                mensagem.includes("Erro")
-                  ? "bg-red-900 text-red-300"
-                  : "bg-green-900 text-green-300"
-              }`}
-            >
-              {mensagem}
-            </p>
-          )}
+          {chamados.map((chamado) => (
+            <div key={chamado.id} className="bg-blue-800 p-4 mb-3 rounded">
 
-          {chamados.length === 0 ? (
-            <p>Nenhum chamado encontrado.</p>
-          ) : (
-            <div className="space-y-4">
-              {chamados.map((chamado) => (
-                <div
-                  key={chamado.id}
-                  className="bg-blue-800 border border-blue-700 p-4 rounded-lg shadow hover:shadow-lg transition"
-                >
-                  <p className="font-semibold text-lg">
-                    {chamado.titulo}
-                  </p>
+              <p className="font-bold">{chamado.titulo}</p>
+              <p className="text-sm">Criado por: {chamado.usuario_nome}</p>
+              <p>Status: {chamado.status_nome}</p>
 
-                  <p className="mb-2">
-                    Status:{" "}
-                    <span
-                      className={
-                        chamado.status_nome === "ATIVO"
-                          ? "text-green-400 font-semibold"
-                          : chamado.status_nome === "FINALIZADO"
-                          ? "text-yellow-400 font-semibold"
-                          : "text-red-400 font-semibold"
-                      }
-                    >
-                      {chamado.status_nome}
-                    </span>
-                  </p>
+              {isAdmin && (
+                <div className="mt-2">
 
-                  {/* ADMIN ONLY */}
-                  {isAdmin ? (
-                    <>
-                      <select
-                        value={
-                          statusTemp[chamado.id] !== undefined
-                            ? statusTemp[chamado.id]
-                            : chamado.status
-                        }
-                        onChange={(e) =>
-                          setStatusTemp({
-                            ...statusTemp,
-                            [chamado.id]: Number(e.target.value),
-                          })
-                        }
-                        className="bg-blue-900 border border-blue-700 p-2 rounded mr-2 text-white"
-                      >
-                        {statusList.map((status) => (
-                          <option key={status.id} value={status.id}>
-                            {status.nome}
-                          </option>
-                        ))}
-                      </select>
+                  <select
+                    value={
+                      statusTemp[chamado.id] !== undefined
+                        ? statusTemp[chamado.id]
+                        : chamado.status
+                    }
+                    onChange={(e) =>
+                      setStatusTemp({
+                        ...statusTemp,
+                        [chamado.id]: Number(e.target.value),
+                      })
+                    }
+                    className="bg-blue-900 p-2 mr-2"
+                  >
+                    {statusList.map((status) => (
+                      <option key={status.id} value={status.id}>
+                        {status.nome}
+                      </option>
+                    ))}
+                  </select>
 
-                      <button
-                        onClick={() =>
-                          atualizarStatus(
-                            chamado.id,
-                            statusTemp[chamado.id] !== undefined
-                              ? statusTemp[chamado.id]
-                              : chamado.status
-                          )
-                        }
-                        disabled={loadingId === chamado.id}
-                        className="bg-green-500 px-3 py-2 rounded hover:bg-green-600 hover:scale-105 transition transform"
-                      >
-                        {loadingId === chamado.id ? "Salvando..." : "Salvar"}
-                      </button>
-                    </>
-                  ) : (
-                    <p className="text-sm text-blue-300">
-                      Apenas administradores podem alterar o status
-                    </p>
-                  )}
+                  <button
+                    onClick={() =>
+                      atualizarStatus(
+                        chamado.id,
+                        statusTemp[chamado.id] !== undefined
+                          ? statusTemp[chamado.id]
+                          : chamado.status
+                      )
+                    }
+                    className="bg-green-500 px-2 py-1 mr-2"
+                  >
+                    Salvar
+                  </button>
+
+                  <button
+                    onClick={() => deletarChamado(chamado.id)}
+                    className="bg-red-500 px-2 py-1"
+                  >
+                    Excluir
+                  </button>
                 </div>
-              ))}
+              )}
+
+              {chamado.status_nome === "ATIVO" && (
+                <div className="mt-3">
+
+                  <button
+                    onClick={() => buscarRespostas(chamado.id)}
+                    className="text-sm underline"
+                  >
+                    Carregar respostas
+                  </button>
+
+                  {respostas[chamado.id]?.map((r) => (
+                    <p key={r.id}>
+                      <strong>{r.usuario_nome}:</strong> {r.mensagem}
+                    </p>
+                  ))}
+
+                  <input
+                    value={novaResposta[chamado.id] || ""}
+                    onChange={(e) =>
+                      setNovaResposta({
+                        ...novaResposta,
+                        [chamado.id]: e.target.value,
+                      })
+                    }
+                    placeholder="Responder..."
+                    className="w-full mt-2 p-2 bg-blue-900"
+                  />
+
+                  <button
+                    onClick={() => enviarResposta(chamado.id)}
+                    className="bg-blue-500 px-2 py-1 mt-2"
+                  >
+                    Enviar
+                  </button>
+
+                </div>
+              )}
+
             </div>
-          )}
+          ))}
+
         </div>
 
       </div>

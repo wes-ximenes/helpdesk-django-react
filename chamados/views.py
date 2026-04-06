@@ -1,13 +1,15 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
-from .serializers import ChamadoSerializer, HistoricoStatusSerializer, StatusSerializer, UserSerializer
+from .serializers import ChamadoSerializer, HistoricoStatusSerializer, StatusSerializer, UserSerializer, RespostaSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status as http_status
-from .models import Chamado, Status, HistoricoStatus
+from .models import Chamado, Status, HistoricoStatus, Resposta
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from django.contrib.auth.models import User
+
+from chamados import serializers
 
 
 class ChamadoViewSet(ModelViewSet):
@@ -91,3 +93,28 @@ class MeView(APIView):
         return Response(serializer.data)
        
 
+class RespostaViewSet(ModelViewSet):
+    queryset = Resposta.objects.all()
+    serializer_class = RespostaSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = Resposta.objects.all()
+
+        chamado_id = self.request.query_params.get('chamado')
+
+        if chamado_id:
+            queryset = queryset.filter(chamado_id=chamado_id)
+
+        return queryset.order_by('criado_em')
+
+
+    def perform_create(self, serializer):
+        chamado = serializer.validated_data['chamado']
+        serializer.save(usuario=self.request.user)
+
+        # Campo resposta apenas se chamado estiver ATIVO
+        if chamado.status.nome != "ATIVO":
+            raise serializers.ValidationError("Só é possível responder chamados ATIVOS.")
+
+        serializer.save(usuario=self.request.user)

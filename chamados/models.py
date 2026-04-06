@@ -42,3 +42,16 @@ class HistoricoStatus(models.Model):
 
     def __str__(self):
         return f'Chamado: {self.chamado.titulo} - Status: {self.status.nome}'
+    
+
+class Resposta(models.Model):  #Classe para armazenar as respostas dos chamados
+    chamado = models.ForeignKey(Chamado, on_delete=models.CASCADE, related_name='respostas')
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    mensagem = models.TextField()
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['criado_em']
+
+    def __str__(self):
+        return f'{self.usuario.username}: {self.mensagem[:30]}'    
