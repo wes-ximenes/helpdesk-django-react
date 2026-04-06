@@ -135,7 +135,6 @@ O projeto segue uma arquitetura baseada em API REST, com separação clara entre
 
 ### Backend
 
-```bash
 cd backend
 python -m venv venv
 venv\Scripts\activate
@@ -145,7 +144,6 @@ python manage.py runserver
 ```
 ### Frontend
 
-```bash
 cd frontend
 npm install
 npm run dev
