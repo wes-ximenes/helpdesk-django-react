@@ -1,123 +1,169 @@
 # HelpDesk — Sistema de Gerenciamento de Chamados
 
-Sistema de Helpdesk desenvolvido como **projeto acadêmico e de portfólio**, com o objetivo de simular um ambiente real de suporte técnico utilizado por empresas de médio porte.
+Sistema de Helpdesk desenvolvido como projeto acadêmico e de portfólio, com foco em simular um ambiente real de suporte técnico, incluindo autenticação, controle de permissões e comunicação entre usuários e administradores.
 
-O projeto foi pensado para aplicar, na prática, conceitos de **desenvolvimento full stack**, **organização de chamados**, **persistência de dados** e **geração de relatórios**.
+O projeto aplica na prática conceitos de desenvolvimento full stack, APIs REST, autenticação JWT, regras de negócio e integração frontend/backend.
 
 ---
 
 ## Visão Geral
 
-O HelpDesk permite que usuários abram chamados de suporte, acompanhem o status das solicitações e que a equipe técnica gerencie esses atendimentos de forma organizada e eficiente.
+O sistema permite que usuários abram chamados de suporte, acompanhem o andamento e interajam com a equipe através de um sistema de respostas (chat por chamado).
 
-Este projeto representa a transição do aprendizado teórico para a prática, simulando desafios reais enfrentados no dia a dia de um time de tecnologia.
+Administradores possuem controle total sobre os chamados, podendo atualizar status, responder e excluir registros.
 
 ---
 
 ## Funcionalidades
 
-### Usuários
-- Cadastro e autenticação básica
-- Abertura de chamados
-- Acompanhamento do status do chamado
+### Autenticação
+- Login com JWT (JSON Web Token)
+- Persistência de sessão no frontend
+- Controle de acesso por tipo de usuário:
+  - Admin
+  - Usuário comum
+
+---
 
 ### Chamados
-- Criação, edição e exclusão (CRUD)
-- Controle de status:
-  - 🟢 Ativo
-  - 🟡 Finalizado 
-  - 🔴 Cancelado
-- Associação de chamados a usuários
+- Criação de chamados
+- Listagem com paginação
+- Atualização de status (admin)
+- Exclusão de chamados (admin)
+- Associação automática ao usuário autenticado
 
-### Relatórios
-- Geração de relatórios estatísticos
-- Processamento auxiliar desenvolvido em **Python**
-- Análise de volume e status dos chamados
+---
+
+### Status dos Chamados
+- ATIVO  
+- FINALIZADO  
+- CANCELADO  
+
+**Regra de negócio:**
+- Apenas chamados ATIVOS podem ser alterados ou receber respostas
+
+---
+
+### Chat por Chamado (Diferencial do Projeto)
+- Sistema de respostas vinculado ao chamado
+- Comunicação entre usuário e administrador
+- Histórico de mensagens
+- Identificação do autor da mensagem
+
+**Regra de negócio:**
+- Respostas permitidas apenas para chamados ATIVOS
+
+---
+
+### Dashboard
+- Exibição de estatísticas:
+  - Total de chamados
+  - Chamados resolvidos
+- Visualização do usuário criador do chamado
+- Interface moderna com Tailwind CSS
 
 ---
 
 ## Problema Resolvido
 
-Empresas que lidam com múltiplas solicitações de suporte precisam de uma forma clara e organizada de gerenciar atendimentos sem perder informações importantes.
+Empresas que lidam com múltiplas solicitações de suporte precisam de uma forma eficiente de gerenciar atendimentos e manter histórico de comunicação.
 
 Este sistema resolve:
-- Falta de organização nos atendimentos
-- Dificuldade em acompanhar o andamento dos chamados
-- Ausência de dados estatísticos para tomada de decisão
+- Falta de organização em chamados
+- Dificuldade de comunicação entre cliente e suporte
+- Ausência de controle de status
+- Falta de indicadores para acompanhamento
 
 ---
 
 ## Tecnologias Utilizadas
 
 ### Frontend
-- HTML5  
-- CSS3  
-- JavaScript/ React 
-
-### Backend
-- Python/ Django
-
-### Banco de Dados
-O banco de dados do sistema HelpDesk foi modelado utilizando **PostgreSQL**.
-
-##Estrutura inicial
-O modelo contempla as entidades principais do sistema:
-- Usuários
-- Chamados
-- Status dos chamados
-
-Foram definidas:
-- Chaves primárias (ID's)
-- Chaves estrangeiras (usuario_id, status_id, chamado_id) para relacionamento entre tabelas
-- Regras básicas de integridade referencial
-
-##Observações
-Esta é a modelagem inicial (MVP) do banco de dados e poderá evoluir(sofrer alterações) conforme novas funcionalidades forem adicionadas ao sistema.
-
-### Processamento Auxiliar
-- Linguagem C (relatórios estatísticos)
+- React (Vite)
+- JavaScript
+- Tailwind CSS
+- Axios
 
 ---
 
-## Arquitetura e Organização
+### Backend
+- Python
+- Django
+- Django REST Framework
+- Autenticação JWT (SimpleJWT)
 
-O projeto segue uma separação clara de responsabilidades entre frontend, backend e processamento auxiliar, facilitando manutenção e escalabilidade.
+---
+
+### Banco de Dados
+- PostgreSQL
+
+---
+
+## Arquitetura do Projeto
+
+O projeto segue uma arquitetura baseada em API REST, com separação clara entre frontend e backend.
+
+---
+
+## Principais Conceitos Aplicados
+
+- CRUD completo com API REST
+- Autenticação e autorização com JWT
+- Controle de permissões (admin vs usuário)
+- Regras de negócio no backend
+- Consumo de API no React
+- Gerenciamento de estado com useState e useEffect
+- Tratamento de erros (frontend e backend)
+- Integração completa full stack
+
+---
+
+## Melhorias Implementadas Recentemente
+
+- Implementação do sistema de chat por chamado
+- Criação de endpoint `/respostas/`
+- Controle de respostas por status (ATIVO)
+- Exibição do usuário criador do chamado
+- Estatísticas no dashboard
+- Melhorias visuais com Tailwind CSS
+- Correção de paginação (uso de `response.data.results`)
+- Ajuste de arquitetura (usuario definido via `request.user`)
+
+---
+
+## Como Executar o Projeto
+
+### Backend
+
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
 
 
-/
-├── frontend/
-│   ├── pages/
-│   ├── css/
-│   └── js/
-├── backend/
-│   ├── config/
-│   ├── controllers/
-│   ├── models/
-│   └── services/
-├── database/
-│   └── script.sql
-├── reports/
-│   └── relatorios.c
-└── README.md
+## Autor
 
+**Wesley Ximenes**
 
-Alunos Envolvidos e Papéis
+- Backend Developer  
+- Experiência com Python, Django, React e APIs REST  
 
-Devido ao contexto acadêmico e ao tamanho reduzido da equipe, os integrantes assumiram múltiplos papéis estratégicos e operacionais, prática comum em times ágeis, startups e projetos educacionais.
+---
 
-👤 Wesley Ximenes
+## Objetivo do Projeto
 
-Backend Developer
+Projeto desenvolvido com foco em:
 
-- Modelagem do banco de dados
-- Implementação das regras de negócio
-- Desenvolvimento de API e autenticação JWT
-- Segurança e persistência dos dados
-
-Justificativa Acadêmica
-
-Projeto desenvolvido com intenção de permitir uma visão completa do ciclo de vida do produto — do planejamento à entrega.
-
-Licença
-
-Projeto desenvolvido para fins educacionais e de portfólio. Início FEV/2026
+- Consolidar conhecimentos em desenvolvimento full stack  
+- Simular um sistema real de mercado  
+- Servir como portfólio profissional  
